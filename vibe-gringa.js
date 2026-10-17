@@ -67,3 +67,50 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
   addEventListener('load',run);
 })();
+
+/* Carrinho: valor "com Pix" sempre igual ao total atual (com cupom, frete e quantidade). Botão do app de cupons sem tapar o conteúdo. */
+;(function(){
+  var R=null;
+  function num(t){t=String(t||'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');var n=parseFloat(t);return isNaN(n)?null:n}
+  function brl(n){var s=n.toFixed(2).split('.');return 'R$ '+s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.')+','+s[1]}
+  function vis(e){if(!e)return false;var c=getComputedStyle(e);return c.display!=='none'&&c.visibility!=='hidden'&&+c.opacity>0&&e.getBoundingClientRect().height>0}
+  function rate(m){
+    var p=m.querySelector('.js-payment-discount-price-cart'),s=m.querySelector('.js-cart-subtotal');
+    var a=p&&num(p.textContent),b=s&&num(s.textContent);
+    if(a&&b&&a<b&&a/b>.5)return 1-Math.round((1-a/b)*1000)/1000;
+    var o=document.querySelector('.vg-pixoff,.vgp-off'),k=o&&o.textContent.match(/(\d+(?:[.,]\d+)?)\s*%/);
+    return k?1-parseFloat(k[1].replace(',','.'))/100:null;
+  }
+  function pix(){
+    var m=document.querySelector('.modal-cart');if(!m)return;
+    if(R===null)R=rate(m);if(!R)return;
+    var p=m.querySelector('.js-payment-discount-price-cart'),t=m.querySelector('.js-cart-total');if(!p||!t)return;
+    var total=num(t.textContent);if(total===null)return;
+    var ship=0;[].forEach.call(m.querySelectorAll('.cart-shipping-costs-price'),function(e){var x=e,on=true;while(x&&x!==m){if(getComputedStyle(x).display==='none'){on=false;break}x=x.parentElement}if(on){var v=num(e.textContent);if(v)ship=v}});
+    var txt=brl(Math.max(0,total-ship)*R+ship);
+    if(p.textContent.trim()!==txt)p.textContent=txt;
+  }
+  function cash(){
+    [].forEach.call(document.querySelectorAll('body > div'),function(d){
+      if(!d.classList.contains('vg-cashing')&&getComputedStyle(d).position==='fixed'&&d.querySelector('[class*="mi-"]'))d.classList.add('vg-cashing');
+    });
+    var c=document.querySelector('.js-notification-cookie-banner');
+    document.documentElement.classList.toggle('vg-cookie',!!(c&&vis(c)));
+  }
+  function css(){
+    if(document.getElementById('vg-fix-css'))return;
+    var s=document.createElement('style');s.id='vg-fix-css';
+    s.textContent='body>.vg-cashing{transform:scale(.8);transform-origin:left bottom;transition:transform .3s,margin .3s}html.vg-cookie body>.vg-cashing{margin-bottom:96px!important}@media (max-width:767px){body>.vg-cashing{transform:scale(.72);margin-left:12px!important;margin-bottom:14px!important}html.vg-cookie body>.vg-cashing{margin-bottom:120px!important}}';
+    document.head.appendChild(s);
+  }
+  var q=0;function run(){clearTimeout(q);q=setTimeout(function(){try{pix()}catch(e){}try{cash()}catch(e){}},60)}
+  function init(){
+    css();var m=document.querySelector('.modal-cart');if(m&&R===null)R=rate(m);
+    run();var mo=new MutationObserver(run);
+    if(m)mo.observe(m,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class','style']});
+    mo.observe(document.body,{childList:true});
+    var c=document.querySelector('.js-notification-cookie-banner');if(c)mo.observe(c,{attributes:true});
+    addEventListener('load',run);setTimeout(run,3000);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
