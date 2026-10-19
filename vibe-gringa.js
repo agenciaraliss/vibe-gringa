@@ -100,7 +100,7 @@
   function css(){
     if(document.getElementById('vg-fix-css'))return;
     var s=document.createElement('style');s.id='vg-fix-css';
-    s.textContent='body>.vg-cashing{transform:scale(.8);transform-origin:left bottom;transition:transform .3s,margin .3s}html.vg-cookie body>.vg-cashing{margin-bottom:96px!important}@media (max-width:767px){body>.vg-cashing{transform:scale(.72);margin-left:12px!important;margin-bottom:14px!important}html.vg-cookie body>.vg-cashing{margin-bottom:120px!important}}';
+    s.textContent='body>.vg-cashing{transition:margin .3s}html.vg-cookie body>.vg-cashing{margin-bottom:96px!important}@media (max-width:767px){html.vg-cookie body>.vg-cashing{margin-bottom:120px!important}}';
     document.head.appendChild(s);
   }
   var q=0;function run(){clearTimeout(q);q=setTimeout(function(){try{pix()}catch(e){}try{cash()}catch(e){}},60)}
